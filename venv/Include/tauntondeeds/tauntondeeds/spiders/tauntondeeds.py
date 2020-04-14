@@ -19,9 +19,10 @@ class BristolSpider(scrapy.Spider):
 
     def parse(self, response):
 
+        for form in [formdata, formdata_1]:
 
-        yield scrapy.FormRequest.from_response(response=response,
-                                               formdata=formdata_1,
+            yield scrapy.FormRequest(url=BristolSpider.start_urls[0],
+                                               formdata=form,
                                                callback=self.parse_item)
 
     def parse_item(self, response):
@@ -74,8 +75,12 @@ class BristolSpider(scrapy.Spider):
             raw_street = re.search(
                 r"(ST|RD|AVE|WAY|LANE|AS).+(ST|RD|AVE|WAY|LANE)",
                 raw_description)
-            temp = re.search(r"\d+.+(ST|RD|AVE|WAY|LANE|AS\s)",
-                             raw_street.group(0))
+            if raw_street !=None:
+                temp = re.search(r"\d+.+(ST|RD|AVE|WAY|LANE|AS\s)",
+                                 raw_street.group(0))
+            else:
+                temp = re.search(r"[0-9\-]+[A-Z\s]+(ST|RD|AVE|WAY|LANE|AS\s)",
+                                 raw_description)
 
             if temp != None:
                 raw_data['street_address'] = temp.group(0)
@@ -100,11 +105,11 @@ class BristolSpider(scrapy.Spider):
 
             print(json.dumps(raw_data, default=str))
 
-        curent_page = int(formdata_1['__EVENTARGUMENT'].split('$')[1])
+
 
         # formdata_1['__EVENTARGUMENT'] = 'Page${}'.format(curent_page + 1)
 
-        print(formdata_1['__EVENTARGUMENT'])
+
         #
         # yield scrapy.FormRequest.from_response(response=response,
         #                                        formdata=formdata_1,
