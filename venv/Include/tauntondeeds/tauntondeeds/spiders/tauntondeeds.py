@@ -1,11 +1,11 @@
 import scrapy
 
-
 from datetime import datetime
 import re
 import json
 
 from tauntondeeds.formdata_storage import formdata, formdata_1
+
 
 class BristolSpider(scrapy.Spider):
     name = 'bristol'
@@ -20,10 +20,9 @@ class BristolSpider(scrapy.Spider):
     def parse(self, response):
 
         for form in [formdata, formdata_1]:
-
             yield scrapy.FormRequest(url=BristolSpider.start_urls[0],
-                                               formdata=form,
-                                               callback=self.parse_item)
+                                     formdata=form,
+                                     callback=self.parse_item)
 
     def parse_item(self, response):
         pagination_selector = """//*[@onmouseover="this.originalClass=this.className;this.className='gridHighlight'"]"""
@@ -63,9 +62,13 @@ class BristolSpider(scrapy.Spider):
             raw_description = item.xpath('td/span/text()').get()
 
             # get the description
-            raw_data['description'] = raw_description
+            temp_description = re.search(r".+[0-9]+-[A-Z]", raw_description)
+            if temp_description != None:
+                raw_data['description'] = temp_description.group(0)
+            else:
+                raw_data['description'] = None
 
-            # get the cost
+                # get the cost
             raw_cost = raw_description.find('$')
             if raw_cost != -1:
                 raw_data['cost'] = float(
@@ -75,7 +78,7 @@ class BristolSpider(scrapy.Spider):
             raw_street = re.search(
                 r"(ST|RD|AVE|WAY|LANE|AS).+(ST|RD|AVE|WAY|LANE)",
                 raw_description)
-            if raw_street !=None:
+            if raw_street != None:
                 temp = re.search(r"\d+.+(ST|RD|AVE|WAY|LANE|AS\s)",
                                  raw_street.group(0))
             else:
@@ -98,32 +101,7 @@ class BristolSpider(scrapy.Spider):
             # get the zip
             # I did not found zip in this request data
 
-            # for i in raw_data.keys():
             #     print(i, '=', raw_data[i])
 
-            # print json file
-
+            # print json data
             print(json.dumps(raw_data, default=str))
-
-
-
-        # formdata_1['__EVENTARGUMENT'] = 'Page${}'.format(curent_page + 1)
-
-
-        #
-        # yield scrapy.FormRequest.from_response(response=response,
-        #                                        formdata=formdata_1,
-        #                                        callback=self.parse_item)
-
-# this code is worked
-
-# def parse_item(self, response):
-#     pagination_selector = """//*[@onmouseover="this.originalClass=this.className;this.className='gridHighlight'"]/td"""
-#
-#     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-#     page_list = response.xpath(pagination_selector)
-#
-#     for item in page_list:
-#         print(item.xpath('text()').extract())
-#         print(item.xpath('span/text()').extract())
-#     yield response
