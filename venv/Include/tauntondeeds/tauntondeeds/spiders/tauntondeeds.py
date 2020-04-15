@@ -4,6 +4,7 @@ from datetime import datetime
 import re
 import json
 
+from tauntondeeds.items import TauntondeedsItem
 from tauntondeeds.formdata_storage import formdata, formdata_1
 
 
@@ -13,6 +14,7 @@ class BristolSpider(scrapy.Spider):
     start_urls = ['http://www.tauntondeeds.com/Searches/ImageSearch.aspx']
 
     def none_molder(data):
+
         if data == '\xa0':
             data = None
         return data
@@ -29,12 +31,9 @@ class BristolSpider(scrapy.Spider):
 
         page_list = response.xpath(pagination_selector)
 
+
         for item in page_list:
-            raw_data = {'date': None, 'type': None, 'book': None,
-                        'page_num': None,
-                        'doc_num': None, 'city': None, 'description': None,
-                        'cost': None, 'street_address': None, 'state': None,
-                        'zip': None}
+            raw_data = TauntondeedsItem()
 
             # get the date
             raw_data['date'] = datetime.strptime(
@@ -52,23 +51,23 @@ class BristolSpider(scrapy.Spider):
             raw_data['page_num'] = BristolSpider.none_molder(
                 item.xpath('td[5]/text()').get())
 
-            # get the page_num
+            # get the doc_num
             raw_data['doc_num'] = item.xpath(
-                'td[6]/text()').get()  # get the doc_num
+                'td[6]/text()').get()
 
-            # get the page_num
-            raw_data['city'] = item.xpath('td[7]/text()').get()  # get the city
+            # get the city
+            raw_data['city'] = item.xpath('td[7]/text()').get()
 
             raw_description = item.xpath('td/span/text()').get()
 
             # get the description
-            temp_description = re.search(r".+[0-9]+-[A-Z]", raw_description)
+            temp_description = re.search(r".+[0-9]+-[A-Z]|[)]", raw_description)
             if temp_description != None:
                 raw_data['description'] = temp_description.group(0)
             else:
                 raw_data['description'] = None
 
-                # get the cost
+            # get the cost
             raw_cost = raw_description.find('$')
             if raw_cost != -1:
                 raw_data['cost'] = float(
@@ -76,7 +75,7 @@ class BristolSpider(scrapy.Spider):
 
             # get the street_adress
             raw_street = re.search(
-                r"(ST|RD|AVE|WAY|LANE|AS).+(ST|RD|AVE|WAY|LANE)",
+                r"(ST|RD|AVE|WAY|LANE|AS|\))[0-9A-Z\s\-]+(ST|RD|AVE|WAY|LANE)",
                 raw_description)
             if raw_street != None:
                 temp = re.search(r"\d+.+(ST|RD|AVE|WAY|LANE|AS\s)",
@@ -101,7 +100,4 @@ class BristolSpider(scrapy.Spider):
             # get the zip
             # I did not found zip in this request data
 
-            #     print(i, '=', raw_data[i])
-
-            # print json data
-            print(json.dumps(raw_data, default=str))
+            yield raw_data

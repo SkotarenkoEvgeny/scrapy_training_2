@@ -14,6 +14,9 @@ BOT_NAME = 'tauntondeeds'
 SPIDER_MODULES = ['tauntondeeds.spiders']
 NEWSPIDER_MODULE = 'tauntondeeds.spiders'
 
+# method #2
+# FEED_FORMAT = 'json'
+# FEED_URI = 'output.json'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'tauntondeeds (+http://www.yourdomain.com)'
@@ -64,9 +67,10 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'tauntondeeds.pipelines.TauntondeedsPipeline': 300,
-#}
+
+ITEM_PIPELINES = {
+    'tauntondeeds.pipelines.TauntondeedsPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html

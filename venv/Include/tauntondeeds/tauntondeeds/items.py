@@ -11,4 +11,15 @@ import scrapy
 class TauntondeedsItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+
+    date = scrapy.Field()
+    type = scrapy.Field()
+    book = scrapy.Field()
+    page_num = scrapy.Field()
+    doc_num = scrapy.Field()
+    city = scrapy.Field()
+    description = scrapy.Field()
+    cost = scrapy.Field()
+    street_address = scrapy.Field()
+    state = scrapy.Field()
+    zip = scrapy.Field()
